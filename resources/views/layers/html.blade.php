@@ -32,5 +32,14 @@
     @yield('main-content', 'Default content')
 </div>
 
+<div class="container px-3">
+    <a href="https://www.liqpay.ua/en/checkout/card/checkout_1665011449240443_9583794_tb2kaiVdKXY3fMDsu3Uc">
+        Зроби правильний вибір! <br>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/%D0%92%D0%B8%D0%B1%D0%BE%D1%80%D0%B8_1994.png/375px-%D0%92%D0%B8%D0%B1%D0%BE%D1%80%D0%B8_1994.png"
+             alt="Зроби правильний вибір!"
+        >
+    </a>
+</div>
+
 </body>
 </html>
