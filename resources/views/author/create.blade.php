@@ -18,7 +18,7 @@
         <div class="mb-3">
             <label for="books" class="form-label">books</label>
             <select class="form-control" id="books" name="books[]" multiple required>
-                @foreach($books as $book)
+                @foreach($relations as $book)
                     <option value="{{ $book->book_id }}">
                         {{ $book->name }}
                     </option>

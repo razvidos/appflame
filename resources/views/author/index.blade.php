@@ -6,12 +6,12 @@
 
 @section('main-content')
     <a href="{{ route('author.create') }}" class="btn btn-primary">Add author</a>
-    {{ $authors->links() }}
+    {{ $elements->links() }}
 
     <table class="table table-striped">
         <thead>
         <tr>
-            @foreach (array_keys($authors[0]->toArray()) as $column)
+            @foreach (array_keys($elements[0]->toArray()) as $column)
                 <th scope="col">
                     {{ $column }}
                 </th>
@@ -19,7 +19,7 @@
         </tr>
         </thead>
         <tbody>
-        @foreach ($authors as $author)
+        @foreach ($elements as $author)
             <tr>
                 <td>
                     <a href="{{ route('author.edit', $author->author_id) }}">
@@ -45,6 +45,6 @@
         </tbody>
     </table>
 
-    {{ $authors->links() }}
+    {{ $elements->links() }}
 @endsection
 
