@@ -26,10 +26,13 @@ abstract class CRUD_Controller extends Controller
      */
     public function index(): Application|Factory|View
     {
-        $elements = self::getModelClass(static::MODEL)
-            ::with(mb_strtolower(static::RELATION))
-            ->paginate(15);
-        return view(mb_strtolower(static::MODEL . '.index'))->with(compact('elements'));
+        $model_class = self::getModelClass(static::MODEL);
+        $relation_name = mb_strtolower(static::RELATION);
+
+        $elements = ($model_class)::with($relation_name)->paginate(15);
+
+        $route_name = mb_strtolower(static::MODEL . '.index');
+        return view($route_name)->with(compact('elements'));
     }
 
     /**
@@ -39,10 +42,13 @@ abstract class CRUD_Controller extends Controller
      */
     public function create(): View|Factory|Application
     {
-        $relations = self::getModelClass(static::RELATION)
-            ::all([mb_strtolower(static::RELATION . '_id'), 'name']);
-        return view(mb_strtolower(static::MODEL . '.create'))
-            ->with(compact('relations'));
+        $relation_class = self::getModelClass(static::RELATION);
+        $primary_key = mb_strtolower(static::RELATION . '_id');
+
+        $relations = ($relation_class)::all([$primary_key, 'name']);
+
+        $route_name = mb_strtolower(static::MODEL . '.create');
+        return view($route_name)->with(compact('relations'));
     }
 
     /**
@@ -54,13 +60,20 @@ abstract class CRUD_Controller extends Controller
     public function abstract_store(FormRequest $request): Redirector|RedirectResponse|Application
     {
         $validated = $request->validated();
-        $relation_ids = $validated[mb_strtolower(static::RELATION) . "s"];
-        unset($validated[mb_strtolower(static::RELATION)]);
-        $element = self::getModelClass(static::MODEL)::create($validated);
-        $relation = mb_strtolower(static::RELATION);
-        $element->$relation()->sync($relation_ids);
-        $primary_key = mb_strtolower(static::MODEL . '_id');
-        return redirect(route(mb_strtolower(static::MODEL . '.show'), $element->$primary_key));
+
+        $model_class = self::getModelClass(static::MODEL);
+        $relation_name = mb_strtolower(static::RELATION);
+
+        $relation_ids = $validated[$relation_name . "s"];
+        unset($validated[$relation_name]);
+
+        $element = ($model_class)::create($validated);
+        $element->$relation_name()->sync($relation_ids);
+
+        $model_name = mb_strtolower(static::MODEL);
+        $route_name = $model_name . '.show';
+        $primary_key = $model_name . '_id';
+        return redirect(route($route_name, $element->$primary_key));
     }
 
     /**
@@ -71,8 +84,13 @@ abstract class CRUD_Controller extends Controller
      */
     public function show(int $id): View|Factory|Application
     {
-        $element = self::getModelClass(static::MODEL)::with(mb_strtolower(static::RELATION))->find($id);
-        return view(static::MODEL . '.show')->with(compact('element'));
+        $model_name = self::getModelClass(static::MODEL);
+        $relation_name = mb_strtolower(static::RELATION);
+
+        $element = ($model_name)::with($relation_name)->find($id);
+
+        $route_name = static::MODEL . '.show';
+        return view($route_name)->with(compact('element'));
     }
 
     /**
@@ -83,11 +101,17 @@ abstract class CRUD_Controller extends Controller
      */
     public function edit(int $id): View|Factory|Application
     {
-        $element = self::getModelClass(static::MODEL)::with(mb_strtolower(static::RELATION))->find($id);
-        $relation = mb_strtolower(static::RELATION);
-        $element_relation_ids = $element->$relation->pluck(mb_strtolower(static::RELATION . '_id'));
-        $relations = (self::getModelClass(static::RELATION))::all([mb_strtolower(static::RELATION . '_id'), 'name']);
-        return view(mb_strtolower(static::MODEL. '.edit'))
+        $relation_name = mb_strtolower(static::RELATION);
+        $relation_primary_key = $relation_name . '_id';
+        $model_class = self::getModelClass(static::MODEL);
+        $relation_class = self::getModelClass(static::RELATION);
+
+        $element = ($model_class)::with($relation_name)->find($id);
+        $element_relation_ids = $element->$relation_name->pluck($relation_primary_key);
+        $relations = ($relation_class)::all([$relation_primary_key, 'name']);
+
+        $route_name = mb_strtolower(static::MODEL. '.edit');
+        return view($route_name)
             ->with(compact('element', 'relations', 'element_relation_ids'));
     }
 
@@ -101,15 +125,19 @@ abstract class CRUD_Controller extends Controller
     public function abstract_update(FormRequest $request, int $id): Application|RedirectResponse|Redirector
     {
         $validated = $request->validated();
-        $relation_ids = $validated[mb_strtolower(static::RELATION . 's')];
-        unset($validated[mb_strtolower(static::RELATION. 's')]);
 
-        $element = self::getModelClass(static::MODEL)::find($id);
+        $model_class = self::getModelClass(static::MODEL);
+        $relation_name = mb_strtolower(static::RELATION);
+
+        $relation_ids = $validated[$relation_name. 's'];
+        unset($validated[$relation_name . 's']);
+
+        $element = ($model_class)::find($id);
         $element->update($validated);
-        $relation = mb_strtolower(static::RELATION);
-        $element->$relation()->sync($relation_ids);
+        $element->$relation_name()->sync($relation_ids);
 
-        return redirect(route(mb_strtolower(static::MODEL . '.show'), $id));
+        $route_name = mb_strtolower(static::MODEL . '.show');
+        return redirect(route($route_name, $id));
     }
 
     /**
@@ -120,8 +148,11 @@ abstract class CRUD_Controller extends Controller
      */
     public function destroy(int $id): Redirector|RedirectResponse|Application
     {
-        $element = self::getModelClass(static::MODEL)::find($id);
+        $model_class = self::getModelClass(static::MODEL);
+        $element = ($model_class)::find($id);
         $element->delete();
-        return redirect(route(mb_strtolower(static::MODEL . '.index')));
+
+        $route_name = mb_strtolower(static::MODEL . '.index');
+        return redirect(route($route_name));
     }
 }
